@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Site to RSS</title>
+    <meta name="description" content="TODO">
+    <link rel="stylesheet" href="./style.css">
+    <link rel="icon" href="images/favicon.svg" type="images/x-icon">
+    <link rel="apple-touch-icon" href="images/favicon.svg" />
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+  </head>
+  <body>
+    <main>
+        <div class="form-content">
+          <h1>convert websites to rss</h1>
+          <h3>use simple filters on your favorite sites to generate xml documents for your personal rss feeds<br>---</h3>
+          <!--
+          site_url: String,
+          global_regex: String,
+          items_regex: String,
+          feed_title: String,
+          feed_url: Option<String>,
+          feed_desc: Option<String>,
+          item_title: usize,
+          item_url: Option<usize>,
+          item_content: Option<usize>,
+          -->
+          <form action="/generate-1" method="post">
+              <div class="form-item">
+                  <label for="site_url">Site URL</label>
+                  <input type="url" name="site_url" value="{{site_url}}" readonly/>
+              </div>
+
+              <div class="form-item">
+                  <label for="items_regex">Item Filter</label>
+                  <textarea required type="input" id="items_regex" name="items_regex" placeholder="e.g. <article><h2 {*}><a href={%}>{%}</a></h2>">
+                  {{items_regex}}
+                  </textarea>
+              </div>
+
+            <button type="submit">Next</button>
+          </form>
+        </div>
+    </main>
+    <footer>
+      <p>&copy 2024 max saparov | 🏳️‍⚧️</p>
+      <p>cookies are <span style="font-weight: bold;">never</span> collected or stored by this site.</p>
+      <p>~ i was here ~</p>
+    </footer>
+  </body>
+</html>
