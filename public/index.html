@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Site to RSS</title>
+    <meta name="description" content="TODO">
+    <link rel="stylesheet" href="./style.css">
+    <link rel="icon" href="images/favicon.svg" type="images/x-icon">
+    <link rel="apple-touch-icon" href="images/favicon.svg" />
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+  </head>
+  <body>
+    <main>
+        <h1>convert websites to rss</h1>
+        <!--
+        site_url: String,
+        global_regex: String,
+        items_regex: String,
+        feed_title: String,
+        feed_url: Option<String>,
+        feed_desc: Option<String>,
+        item_title: usize,
+        item_url: Option<usize>,
+        item_content: Option<usize>,
+        -->
+        <form action="/generate" method="post">
+            <div class="form-item">
+                <label for="site_url">Site URL</label>
+                <input required type="text" name="site_url" placeholder="e.g. https://www.maxsaparov.com/"/>
+            </div>
+            <div class="form-item">
+                <label for="global_regex">Global Filter</label>
+                <!-- <label for="help" class="help-box">(?)</label> -->
+                <textarea required type="input" id="global_regex" name="global_regex" placeholder="{*}"></textarea>
+            </div>
+            <!-- <input class="help-box" type="checkbox" id="help">
+            <div class="help-box">todo!</div> -->
+
+            <div class="form-item">
+                <label for="items_regex">Item Filter</label>
+                <textarea required type="input" id="items_regex" name="items_regex" placeholder="<h3>{%}</h3>{*}"></textarea>
+            </div>
+
+            <div class="form-item">
+            <label for="item_title">Item Title</label>
+            <input required type="number" id="item_title" name="item_title" min="1" max="3">
+            </div>
+
+            <div class="form-item">
+            <label for="item_url">item URL</label>
+            <input type="number" id="item_url" name="item_url" min="1" max="3">
+            </div>
+
+            <div class="form-item">
+            <label for="item_content">Item Content</label>
+            <input type="number" id="item_content" name="item_content" min="1" max="3">
+            </div>
+
+            <div class="form-item">
+            <label for="feed_title">Feed Title</label>
+            <textarea required type="input" id="feed_title" name="feed_title"></textarea>
+            </div>
+
+            <div class="form-item">
+            <label for="feed_url">Feed URL</label>
+            <textarea type="input" id="feed_url" name="feed_url"></textarea>
+            </div>
+
+            <div class="form-item">
+            <label for="feed_desc">Feed Description</label>
+            <textarea type="input" id="feed_desc" name="feed_desc"></textarea>
+            </div>
+
+          <button type="submit">Generate</button>
+        </form>
+    </main>
+    <footer>
+      <p>&copy 2024 max saparov | 🏳️‍⚧️</p>
+      <p>cookies are <span style="font-weight: bold;">never</span> collected or stored by this site.</p>
+      <p>~ i was here ~</p>
+    </footer>
+  </body>
+</html>

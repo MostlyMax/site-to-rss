@@ -1,0 +1,11 @@
+## defaults for _all_ profiles
+[default]
+address = "0.0.0.0"
+limits = { form = "64 kB", json = "1 MiB" }
+
+[debug]
+port = 8000
+limits = { json = "10MiB" }
+
+[release]
+port = 9000
