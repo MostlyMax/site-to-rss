@@ -6,6 +6,7 @@ use rocket::{form::Form, State};
 use rocket::serde::{Serialize, Deserialize};
 use rocket::fs::{FileServer, relative};
 use rocket::serde::uuid::Uuid;
+use rocket_dyn_templates::{Template, context};
 
 use regex::Regex;
 
@@ -24,7 +25,7 @@ fn index() -> &'static str {
 #[derive(Debug, FromForm, UriDisplayQuery)]
 struct RssFormData {
     site_url: String,
-    global_regex: String,
+    global_regex: Option<String>,
     items_regex: String,
     feed_title: String,
     feed_url: Option<String>,
@@ -46,7 +47,8 @@ impl TryFrom<Form<RssFormData>> for RssGenData {
     fn try_from(value: Form<RssFormData>) -> Result<Self, error::Error> {
         let site_url = value.get_site_url();
         let items_regex = convert_simple_regex(&value.items_regex)?;
-        let global_regex = convert_simple_regex(&value.global_regex)?;
+        let global_regex = value.global_regex.clone().unwrap_or("..*+".to_owned());
+        let global_regex = convert_simple_regex(&global_regex)?;
         let id = Uuid::new_v4();
 
         Ok(RssGenData {
@@ -153,8 +155,10 @@ async fn get_gen_data(id_xml: PathBuf, client: &State<Client>) -> Result<RssGenD
     Ok(rss_gen_data)
 }
 
-#[get("/rss/<id_xml>")]
+#[get("/<id_xml>")]
 async fn get_rss(id_xml: PathBuf, client: &State<Client>) -> Result<String, Error> {
+    eprintln!("ping");
+
     let rss_gen_data = get_gen_data(id_xml, client).await?;
     let text = get_site_text(&rss_gen_data.site_url).await?;
 
@@ -206,12 +210,22 @@ async fn get_rss(id_xml: PathBuf, client: &State<Client>) -> Result<String, Erro
 // }
 
 #[post("/generate", data = "<form>")]
+#[allow(dead_code)]
+async fn api_generate(form: Form<RssFormData>, client: &State<Client>) -> Result<String, Error> {
+    generate(form, client).await
+}
+
+#[post("/generate", data = "<form>")]
+async fn template_generate(form: Form<RssFormData>, client: &State<Client>) -> Result<Template, Error> {
+    let id_xml = generate(form, client).await?;
+
+    eprintln!("{}", id_xml);
+    Ok(Template::render("generate", context! { id_xml: id_xml }))
+}
+
 async fn generate(form: Form<RssFormData>, client: &State<Client>) -> Result<String, Error> {
     let _ = get_site_text_dry(&form.site_url).await?;
     let rss_gen_data = RssGenData::try_from(form)?;
-
-    // push object to s3
-    eprintln!("{:#?}", rss_gen_data);
 
     let serialized_data = serde_json::to_string(&rss_gen_data).unwrap();
 
@@ -234,6 +248,9 @@ async fn rocket() -> _ {
 
     rocket::build()
         .mount("/", FileServer::from(relative!("public")))
-        .mount("/", routes![index, generate, get_rss])
+        .mount("/", routes![index, template_generate])
+        .mount("/rss/", routes![get_rss])
+        .mount("/api/", routes![api_generate])
+        .attach(Template::fairing())
         .manage(client)
 }

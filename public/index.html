@@ -13,7 +13,7 @@
   </head>
   <body>
     <main>
-        <div class="main-content">
+        <div class="form-content">
           <h1>convert websites to rss</h1>
           <h3>use simple filters on your favorite sites to generate xml documents for your personal rss feeds<br>---</h3>
           <!--
@@ -30,7 +30,7 @@
           <form action="/generate" method="post">
               <div class="form-item">
                   <label for="site_url">Site URL</label>
-                  <input required type="text" name="site_url" placeholder="e.g. https://plurrrr.com/"/>
+                  <input required type="url" name="site_url" placeholder="e.g. https://plurrrr.com/"/>
               </div>
               <div class="form-item">
                   <label for="global_regex">Global Filter</label>
