@@ -8,6 +8,7 @@ COPY Cargo.lock ./
 RUN cargo build --release
 
 COPY public ./public/
+COPY templates ./templates/
 COPY Rocket.toml ./
 
 CMD cargo run --release
