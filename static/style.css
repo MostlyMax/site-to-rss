@@ -39,6 +39,7 @@ h1, h2, h3, p, label {
 
 .full-content h3 {
     word-break: break-all ;
+    padding: 0px;
 }
 
 .full-content input {
@@ -74,10 +75,18 @@ h1, h2, h3, p, label {
     width: 50%;
 }
 
+.form-content p {
+    margin: 0px;
+    padding: 0px;
+}
+
+.form-content span {
+    margin: 0px;
+    padding: 0px;
+}
+
 .form-content h3 {
     font-weight: lighter;
-    padding-left: 20px;
-    padding-right: 20px;
     margin: 0px;
     margin-bottom: 20px;
 }
@@ -86,10 +95,6 @@ h1, h2, h3, p, label {
     font-size: 64px;
     margin: 20px;
     padding: 0px;
-}
-
-.form-content p {
-    margin: 20px;
 }
 
 form {
@@ -151,7 +156,7 @@ form button:hover {
     justify-content: end;
     align-items: start;
     gap: 5px;
-    margin-bottom: 30px;
+    margin-bottom: 50px;
 }
 
 .form-item label, .form-item-readonly label {

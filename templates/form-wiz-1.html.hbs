@@ -36,7 +36,7 @@
 
               <div class="form-item">
                 <p>
-                  use the site html to capture items you are interested in (see example below!)
+                  use the site html to capture items you are interested in (<a href="#example-section">see example below!</a>)
                 </p>
                 <p>
                   • {*} is a wildcard for any string of words<br>
@@ -44,25 +44,28 @@
                 </p>
               </div>
               <div class="form-item">
-                  <label for="items_regex">item filter</label>
-                  <textarea required type="input" id="items_regex" name="items_regex" placeholder="e.g. <article><h2 {*}><a href={%}>{%}</a></h2>">{{items_regex}}</textarea>
+                  <label for="items_regex">item filter*</label>
+                  <textarea required type="input" id="items_regex" name="items_regex">{{items_regex}}</textarea>
               </div>
 
             <button type="submit">Next</button>
 
 
             <div class="form-item">
+            <h3 id="example-section">example</h3>
             <p>
-              for example, if you are trying to pull out articles that look like this:<br><br>
+              say you are trying to pull out articles that look like this:<br><br>
               &ltarticle&gt<br>
               &lth2 id="nix-shell-template"&gt<br>
               &lta href="https://plurrrr.com/archive/2023/07/07.html#nix-shell-template"&gtNix shell template&lt/a&gt<br>
+              ---
             </p>
             <p>
               you could build a pattern to extract the parts you need with {%}:<br><br>
               &ltarticle&gt<br>
               &lth2 id="nix-shell-template"&gt<br>
-              &lta href="{%}"&gt{%}&lt/a&gt
+              &lta href="{%}"&gt{%}&lt/a&gt<br>
+              ---
             </p>
             <p>
               but this will still only match on the heading with id="nix-shell-template" so we need to replace it in our filter with a wildcard {*}:<br><br>
