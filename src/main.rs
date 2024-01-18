@@ -1,6 +1,6 @@
 #[macro_use]
 extern crate rocket;
-use aws_config::BehaviorVersion;
+use aws_config::meta::region::RegionProviderChain;
 use aws_sdk_s3::Client;
 use rocket::{form::Form, State};
 use rocket::serde::{Serialize, Deserialize};
@@ -243,7 +243,8 @@ async fn generate(form: Form<RssFormData>, client: &State<Client>) -> Result<Str
 
 #[launch]
 async fn rocket() -> _ {
-    let config = aws_config::load_defaults(BehaviorVersion::latest()).await;
+    let region_provider = RegionProviderChain::default_provider().or_else("us-east-1");
+    let config = aws_config::from_env().region(region_provider).load().await;
     let client = aws_sdk_s3::Client::new(&config);
 
     rocket::build()
