@@ -22,13 +22,18 @@
             }
             -->
           <form action="/generate-2" method="post">
-              <div class="form-item-readonly">
-                  <label for="site_url">site url</label>
-                  <input type="url" name="site_url" value="{{site_url}}" readonly/>
-              </div>
+              {{{error_msg}}}
 
               <div class="form-item">
-              <label>we've downloaded the site source code and here's what we found:</label>
+                <p>
+                Step 1 is to scroll through the raw site source code and find repeating chunks that
+                you want to extract as rss items. This is done with pattern matching using wildcards {*}
+                and selectors {%}. This can be a little confusing so feel free to take a look at the
+                <a href="#example-section">example below</a>.
+                </p>
+              </div>
+              <div class="form-item">
+              <label>here's a preview of the source code from your site:</label>
               <div class="site-html">
 {{site_html}}
               </div>
@@ -47,6 +52,11 @@
                   <label for="items_regex">item filter*</label>
                   <textarea required type="input" id="items_regex" name="items_regex">{{items_regex}}</textarea>
               </div>
+              <div class="form-item-readonly">
+                  <label for="site_url">site url</label>
+                  <input type="url" name="site_url" value="{{site_url}}" readonly/>
+              </div>
+
 
             <button type="submit">Next</button>
 

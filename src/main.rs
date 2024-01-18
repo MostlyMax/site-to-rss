@@ -30,9 +30,18 @@ fn index() -> Template {
 }
 
 #[post("/generate-1", data = "<form>")]
-async fn generate_1(form: Form<data::FormWiz0>) -> Result<Template, Error> {
-    let text = utils::get_site_text(&form.site_url).await?;
+async fn generate_1(form: Form<data::FormWiz0>) -> Result<Template, Template> {
+    let Ok(text) = utils::get_site_text(&form.site_url).await else {
+        return Err(Template::render("index", context! {
+            site_url: form.site_url.clone(),
+            error_msg: r#"<div class="form-item error"><p>
+            Unable to download site! Check for any typos and make sure the link works!
+            </p></div>"#
+        }));
+    };
+
     let text = text.replace("><", ">\n<");
+
     Ok(Template::render("form-wiz-1", context! {
         site_url: form.site_url.clone(),
         site_html: text
@@ -40,9 +49,21 @@ async fn generate_1(form: Form<data::FormWiz0>) -> Result<Template, Error> {
 }
 
 #[post("/generate-2", data = "<form>")]
-async fn generate_2(form: Form<data::FormWiz1>) -> Result<Template, Error> {
-    let text = utils::get_site_text(&form.site_url).await?;
-    let re = utils::convert_simple_regex(&form.items_regex)?;
+async fn generate_2(form: Form<data::FormWiz1>) -> Result<Template, Template> {
+    let text = utils::get_site_text(&form.site_url).await
+        .expect("this should never fail if its the same url as used in generate_1");
+
+    let Ok(re) = utils::convert_simple_regex(&form.items_regex) else {
+        return Err(Template::render("form-wiz-1", context! {
+            site_url: form.site_url.clone(),
+            site_html: text,
+            error_msg: r#"<div class="form-item error"><p>
+            Something went wrong parsing your item filter. Ensure that there
+            are no typos or extra brackets laying around!
+            </p></div>"#
+        }));
+    };
+
     let mut items_preview = Vec::new();
 
     if let Some(first_cap) = re.captures_iter(&text).next() {
@@ -68,6 +89,17 @@ async fn generate_2(form: Form<data::FormWiz1>) -> Result<Template, Error> {
             current_group_no += 1;
         }
     };
+
+    if items_preview.len() == 0 {
+        return Err(Template::render("form-wiz-1", context! {
+            site_url: form.site_url.clone(),
+            site_html: text,
+            error_msg: r#"<div class="form-item error"><p>
+            Your item filter didn't find any matches. Ensure that there
+            are no typos or extra brackets laying around and try again!
+            </p></div>"#
+        }));
+    }
 
     Ok(Template::render("form-wiz-2", context! {
         site_url: form.site_url.clone(),

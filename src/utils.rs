@@ -30,6 +30,9 @@ pub fn convert_simple_regex(input: &str) -> Result<Regex, Error> {
 
 pub async fn get_site_text(url: &str) -> Result<String, Error> {
     let response = reqwest::get(url).await?;
+    if !response.status().is_success() {
+        return Err(Error::BadRequest("Bad url".to_owned()));
+    }
     let text = response.text().await?;
 
     let text = text.replace("\n", "");

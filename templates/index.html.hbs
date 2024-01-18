@@ -23,6 +23,7 @@
           <h1>convert websites to rss</h1>
           <h3>use simple filters on your favorite sites to generate xml documents for your personal rss feeds</h3>
           <form action="/generate-1" method="post">
+            {{{error_msg}}}
             <input required type="url" name="site_url" value="{{site_url}}" placeholder="enter a url to get started!"/>
             <button type="submit">Start</button>
           </form>

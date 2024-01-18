@@ -15,7 +15,7 @@
     <main>
         <div class="form-content">
             <h1>2</h1>
-            <h3>use simple filters on your favorite sites to generate xml documents for your personal rss feeds<br>---</h3>
+            <h3>matching group numbers to what it does<br>---</h3>
             <!--
             struct FormWiz1 {
                 pub site_url: String,
@@ -23,22 +23,23 @@
             }
             -->
             <form action="/generate-3" method="post">
-                <div class="form-item-readonly">
-                    <label for="site_url">Site URL</label>
-                    <input type="text" name="site_url" value="{{site_url}}" readonly/>
+                <div class="form-item">
+                  <p>
+                  Since the groups are just numbered in order from first to last, step 2 requires you to match the groups found in step 1 using your pattern (the groups are where
+                  you placed the selectors {%}). You need to input the number of the group for the respective fields.
+                  See the <a href="#example-section">example below</a>.
+                  </p>
                 </div>
 
-                <div class="form-item-readonly">
-                    <label for="items_regex">Item Filter</label>
-                    <textarea type="input" id="items_regex" name="items_regex" readonly>{{items_regex}}</textarea>
-                </div>
-
-                <div class="items-preview">
+                <div class="form-item">
+                <label>here are the example groups from the first match found while using your pattern:</label>
+                <div class="site-html">
                 {{#each items_preview}}
                 <p>
                   group {{this.[0]}}: {{this.[1]}}
                 </p>
                 {{/each}}
+                </div>
                 </div>
 
                 <div class="form-item">
@@ -56,7 +57,38 @@
                 <input type="number" id="item_content_no" name="item_content_no" min="1" max="3">
                 </div>
 
+                <div class="form-item-readonly">
+                    <label for="site_url">site url</label>
+                    <input type="text" name="site_url" value="{{site_url}}" readonly/>
+                </div>
+
+                <div class="form-item-readonly">
+                    <label for="items_regex">item filter</label>
+                    <textarea type="input" id="items_regex" name="items_regex" readonly>{{items_regex}}</textarea>
+                </div>
+
                 <button type="submit">Next</button>
+
+                <div class="form-item">
+                <h3 id="example-section">example</h3>
+                <div class="form-item">
+                <label>say your pattern matched the following groups:</label>
+                <div class="site-html">
+                  group 1: https://plurrrr.com/archive/2023/07/07.html#nix-shell-template
+                  group 2: Nix shell template
+                </div>
+                </div>
+                <p>
+                  In this example, group 1 is the url of the article you want to extract. This happened
+                  because the url literally came before anything else in the raw site source code. Thus, you
+                  would put 1 as the entry in <a href="#item_url_no">group number for item url</a>.
+                </p>
+                <p>
+                  Similarly, group 2 would be the title that you want to extract and so you would put a 2
+                  as the entry in <a href="#title_url_no">group number for item url</a>. The title is the only
+                  required field so you are able to keep everything else blank if it isn't needed.
+                </p>
+                </div>
             </form>
         </div>
     </main>
