@@ -148,6 +148,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
     family                   = "site-to-rss-docker"
     network_mode             = "awsvpc"
     execution_role_arn       = "arn:aws:iam::917404528856:role/ecsTaskExecutionRole"
+    task_role_arn            = "arn:aws:iam::917404528856:role/ecs-s3-access"
     requires_compatibilities = ["FARGATE"]
 
     cpu    = 1024
@@ -162,7 +163,6 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
     container_definitions = jsonencode([{
         name      = "site-to-rss-docker"
         image     = "917404528856.dkr.ecr.us-east-1.amazonaws.com/site-to-rss-ecr:latest"
-        # cpu       = 1024
         essential = true
 
         portMappings = [
@@ -172,6 +172,17 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
                 protocol      = "tcp"
             }
         ]
+
+        logConfiguration = {
+            logDriver = "awslogs"
+
+            options = {
+                awslogs-create-group = "true"
+                awslogs-group = "/ecs/site-to-rss-docker"
+                awslogs-region = "us-east-1"
+                awslogs-stream-prefix = "ecs"
+            }
+        }
     }])
 }
 
