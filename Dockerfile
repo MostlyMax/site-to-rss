@@ -7,7 +7,7 @@ COPY Cargo.lock ./
 
 RUN cargo build --release
 
-COPY public ./public/
+COPY static ./static/
 COPY templates ./templates/
 COPY Rocket.toml ./
 
