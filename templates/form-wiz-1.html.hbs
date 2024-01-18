@@ -14,30 +14,35 @@
   <body>
     <main>
         <div class="form-content">
-          <h1>convert websites to rss</h1>
+          <h1>1</h1>
           <h3>use simple filters on your favorite sites to generate xml documents for your personal rss feeds<br>---</h3>
-          <!--
-          site_url: String,
-          global_regex: String,
-          items_regex: String,
-          feed_title: String,
-          feed_url: Option<String>,
-          feed_desc: Option<String>,
-          item_title: usize,
-          item_url: Option<usize>,
-          item_content: Option<usize>,
-          -->
-          <form action="/generate-1" method="post">
-              <div class="form-item">
+            <!--
+            struct FormWiz0 {
+                site_url: String,
+            }
+            -->
+          <form action="/generate-2" method="post">
+              <div class="form-item-readonly">
                   <label for="site_url">Site URL</label>
                   <input type="url" name="site_url" value="{{site_url}}" readonly/>
               </div>
 
+              <div class="site-html">
+{{site_html}}
+              </div>
+
+              <div class="form-item">
+                <p>
+                  use the site html to capture items you are interested in <br>
+                </p>
+                <p>
+                  • {*} is a wildcard that can count as any string of words <br>
+                  • {%} will capture a group of words for later use<br>
+                </p>
+              </div>
               <div class="form-item">
                   <label for="items_regex">Item Filter</label>
-                  <textarea required type="input" id="items_regex" name="items_regex" placeholder="e.g. <article><h2 {*}><a href={%}>{%}</a></h2>">
-                  {{items_regex}}
-                  </textarea>
+                  <textarea required type="input" id="items_regex" name="items_regex" placeholder="e.g. <article><h2 {*}><a href={%}>{%}</a></h2>">{{items_regex}}</textarea>
               </div>
 
             <button type="submit">Next</button>

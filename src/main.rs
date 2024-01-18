@@ -1,184 +1,110 @@
 #[macro_use]
 extern crate rocket;
-use aws_config::meta::region::RegionProviderChain;
-use aws_sdk_s3::Client;
 use rocket::{form::Form, State};
-use rocket::serde::{Serialize, Deserialize};
 use rocket::fs::{FileServer, relative};
-use rocket::serde::uuid::Uuid;
 use rocket_dyn_templates::{Template, context};
 
-use regex::Regex;
+use aws_config::meta::region::RegionProviderChain;
+use aws_sdk_s3::Client;
 
-use std::path::PathBuf;
 use rss::{ChannelBuilder, ItemBuilder};
 
+use std::path::PathBuf;
+
 mod error;
+mod data;
+mod utils;
+
 use error::Error;
+use data::{FormWizGenerate, RssGenData};
 
 
 #[get("/health")]
-fn index() -> &'static str {
+fn health() -> &'static str {
     ":3"
 }
 
-#[derive(Debug, FromForm, UriDisplayQuery)]
-struct RssFormData {
-    site_url: String,
-    global_regex: Option<String>,
-    items_regex: String,
-    feed_title: String,
-    feed_url: Option<String>,
-    feed_desc: Option<String>,
-    item_title: usize,
-    item_url: Option<usize>,
-    item_content: Option<usize>,
+#[get("/")]
+fn index() -> Template {
+    Template::render("index", context!{ })
 }
 
-impl RssFormData {
-    fn get_site_url(&self) -> String {
-        self.site_url.clone()
-    }
+#[post("/generate-1", data = "<form>")]
+async fn generate_1(form: Form<data::FormWiz0>) -> Result<Template, Error> {
+    let text = utils::get_site_text(&form.site_url).await?;
+    let text = text.replace("><", ">\n<");
+    Ok(Template::render("form-wiz-1", context! {
+        site_url: form.site_url.clone(),
+        site_html: text
+    }))
 }
 
-impl TryFrom<Form<RssFormData>> for RssGenData {
-    type Error = error::Error;
+#[post("/generate-2", data = "<form>")]
+async fn generate_2(form: Form<data::FormWiz1>) -> Result<Template, Error> {
+    let text = utils::get_site_text(&form.site_url).await?;
+    let re = utils::convert_simple_regex(&form.items_regex)?;
+    let mut items_preview = Vec::new();
 
-    fn try_from(value: Form<RssFormData>) -> Result<Self, error::Error> {
-        let site_url = value.get_site_url();
-        let items_regex = convert_simple_regex(&value.items_regex)?;
-        let global_regex = value.global_regex.clone().unwrap_or("..*+".to_owned());
-        let global_regex = convert_simple_regex(&global_regex)?;
-        let id = Uuid::new_v4();
+    if let Some(first_cap) = re.captures_iter(&text).next() {
+        const MAX_GROUPS: usize = 10;
+        let mut current_group_no = 0;
 
-        Ok(RssGenData {
-            id,
-            site_url,
-            items_regex,
-            global_regex,
+        for group in first_cap.iter() {
+            if current_group_no >= MAX_GROUPS { break }
 
-            feed_title: value.feed_title.clone(),
-            feed_url: value.feed_url.clone(),
-            feed_desc: value.feed_desc.clone(),
-            item_title: value.item_title.clone(),
-            item_url: value.item_url.clone(),
-            item_content: value.item_content.clone(),
-        })
-    }
-}
+            // 0th group contains full match
+            if current_group_no <= 0 {
+                current_group_no += 1;
+                continue
+            }
 
-#[derive(Debug, Serialize, Deserialize)]
-struct RssGenData {
-    id: Uuid,
-    site_url: String,
-    #[serde(with = "serde_regex")]
-    global_regex: Regex,
-    #[serde(with = "serde_regex")]
-    items_regex: Regex,
-    feed_title: String,
-    feed_url: Option<String>,
-    feed_desc: Option<String>,
-    item_title: usize,
-    item_url: Option<usize>,
-    item_content: Option<usize>,
-}
+            items_preview.push((
+                current_group_no,
+                group
+                    .and_then(|s| Some(s.as_str().to_string()))
+                    .unwrap_or_default()
+            ));
 
-// #[derive(Debug)]
-// struct PreviewRssData {
-//     site_url: String,
-//     // global: Regex,
-//     items: Regex,
-// }
-
-fn convert_simple_regex(input: &str) -> Result<Regex, Error> {
-    let items_re = input.lines().collect::<String>();
-    let items_re = items_re.replace("{%}", "(.*?)");
-    let items_re = items_re.replace("{*}", ".+?");
-    let items_re = items_re.replace(r"\", r"\\");
-    let items_re = items_re.replace("/", r"\/");
-    let items_re = items_re.replace(">", r">\s*?");
-
-    let items_re = format!("(?ms){}", items_re);
-
-    let Ok(re) = Regex::new(&items_re) else {
-        return Err(Error::BadRequest("Invalid regex".to_owned()));
+            current_group_no += 1;
+        }
     };
 
-    Ok(re)
+    Ok(Template::render("form-wiz-2", context! {
+        site_url: form.site_url.clone(),
+        items_regex: form.items_regex.clone(),
+        items_preview: items_preview
+    }))
 }
 
-async fn get_site_text(url: &str) -> Result<String, Error> {
-    let response = reqwest::get(url).await?;
-    let text = response.text().await?;
-
-    let text = text.replace("\n", "");
-    let text = text.replace("\r", "");
-    let text = text.replace("\t", "");
-
-    Ok(text)
+#[post("/generate-3", data = "<form>")]
+async fn generate_3(form: Form<data::FormWiz2>) -> Result<Template, Error> {
+    Ok(Template::render("form-wiz-3", context! {
+        site_url: form.site_url.clone(),
+        items_regex: form.items_regex.clone(),
+        item_title_no: form.item_title_no.clone(),
+        item_url_no: form.item_url_no.clone(),
+        item_content_no: form.item_content_no.clone(),
+    }))
 }
 
-async fn get_site_text_dry(url: &str) -> Result<(), Error> {
-    let response = reqwest::get(url).await?;
-    let _ = response.text().await?;
-
-    Ok(())
-}
-
-fn is_xml(path: &PathBuf) -> bool {
-    path.extension()
-        .map(|s| s == "xml")
-        .unwrap_or(false)
-}
-
-async fn get_gen_data(id_xml: PathBuf, client: &State<Client>) -> Result<RssGenData, Error> {
-    if !is_xml(&id_xml) {
-        return Err(Error::NotFound("Expected xml file".to_owned()));
-    }
-
-    let Some(id) = id_xml.file_stem().and_then(|s| s.to_str()) else {
-        return Err(Error::NotFound("File not found".to_owned()));
-    };
-
-    eprintln!("{}", id);
-
-    let obj = client.get_object()
-        .bucket("max-public-bucket")
-        .key(id)
-        .send()
-        .await?;
-
-    let raw_bytes = obj.body.collect().await?.into_bytes();
-    let response  = std::str::from_utf8(&raw_bytes)?;
-    let rss_gen_data = serde_json::from_str(response)?;
-
-    Ok(rss_gen_data)
-}
 
 #[get("/<id_xml>")]
 async fn get_rss(id_xml: PathBuf, client: &State<Client>) -> Result<String, Error> {
-    eprintln!("ping");
-
-    let rss_gen_data = get_gen_data(id_xml, client).await?;
-    let text = get_site_text(&rss_gen_data.site_url).await?;
-
-    // let text = rss_gen_data.global_regex.find(&text)
-    //     .unwrap().as_str();
-
-    // eprintln!("{}", text);
+    let rss_gen_data = utils::get_gen_data(id_xml, client).await?;
+    let text = utils::get_site_text(&rss_gen_data.site_url).await?;
 
     let mut items = Vec::new();
     for capture in rss_gen_data.items_regex.captures_iter(&text) {
         eprintln!("{:#?}", capture);
         let item_title = capture
-            .get(rss_gen_data.item_title)
+            .get(rss_gen_data.item_title_no)
             .and_then(|s| Some(s.as_str().to_owned()));
 
-        let item_url = rss_gen_data.item_url
+        let item_url = rss_gen_data.item_url_no
             .and_then(|i| capture.get(i))
             .and_then(|s| Some(s.as_str().to_owned()));
 
-        let item_content = rss_gen_data.item_content
+        let item_content = rss_gen_data.item_content_no
             .and_then(|i| capture.get(i))
             .and_then(|s| Some(s.as_str().to_owned()));
 
@@ -201,30 +127,27 @@ async fn get_rss(id_xml: PathBuf, client: &State<Client>) -> Result<String, Erro
 
 }
 
-// #[post("/preview", data = "<form>")]
-// async fn preview(form: Form<RssFormData<'_>>) -> Result<String, BadRequest<String>> {
-//     let site_url = form.get_site_url();
-//     let items = convert_simple_regex(form.items)?;
-//     let text = get_site_text(form.site_url).await?;
-
-// }
-
+/* Seperated /generate into an api call /api/generate and
+   the normal one that currently generates an html template.
+   this is in case i want to use client-side JS in the future instead
+   of server-side rendering
+*/
 #[post("/generate", data = "<form>")]
 #[allow(dead_code)]
-async fn api_generate(form: Form<RssFormData>, client: &State<Client>) -> Result<String, Error> {
+async fn api_generate(form: Form<FormWizGenerate>, client: &State<Client>) -> Result<String, Error> {
     generate(form, client).await
 }
 
 #[post("/generate", data = "<form>")]
-async fn template_generate(form: Form<RssFormData>, client: &State<Client>) -> Result<Template, Error> {
+async fn template_generate(form: Form<FormWizGenerate>, client: &State<Client>) -> Result<Template, Error> {
     let id_xml = generate(form, client).await?;
 
     eprintln!("{}", id_xml);
     Ok(Template::render("generate", context! { id_xml: id_xml }))
 }
 
-async fn generate(form: Form<RssFormData>, client: &State<Client>) -> Result<String, Error> {
-    let _ = get_site_text_dry(&form.site_url).await?;
+async fn generate(form: Form<FormWizGenerate>, client: &State<Client>) -> Result<String, Error> {
+    let _ = utils::get_site_text_dry(&form.site_url).await?;
     let rss_gen_data = RssGenData::try_from(form)?;
 
     let serialized_data = serde_json::to_string(&rss_gen_data).unwrap();
@@ -249,7 +172,7 @@ async fn rocket() -> _ {
 
     rocket::build()
         .mount("/", FileServer::from(relative!("public")))
-        .mount("/", routes![index, template_generate])
+        .mount("/", routes![health, index, generate_1, generate_2, generate_3, template_generate])
         .mount("/rss/", routes![get_rss])
         .mount("/api/", routes![api_generate])
         .attach(Template::fairing())

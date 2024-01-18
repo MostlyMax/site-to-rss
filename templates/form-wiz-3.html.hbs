@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Site to RSS</title>
+    <meta name="description" content="TODO">
+    <link rel="stylesheet" href="./style.css">
+    <link rel="icon" href="images/favicon.svg" type="images/x-icon">
+    <link rel="apple-touch-icon" href="images/favicon.svg" />
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+  </head>
+  <body>
+    <main>
+        <div class="form-content">
+            <h1>3</h1>
+            <h3>use simple filters on your favorite sites to generate xml documents for your personal rss feeds<br>---</h3>
+            <!--
+            pub struct FormWiz2 {
+                pub site_url: String,
+                pub items_regex: String,
+                pub item_title_no: usize,
+                pub item_url_no: Option<usize>,
+                pub item_content_no: Option<usize>,
+            }
+            -->
+            <form action="/generate" method="post">
+                <div class="form-item-readonly">
+                    <label for="site_url">site url*</label>
+                    <input type="url" name="site_url" value="{{site_url}}" readonly/>
+                </div>
+
+                <div class="form-item-readonly">
+                    <label for="items_regex">item filter*</label>
+                    <textarea type="input" id="items_regex" name="items_regex" readonly>{{items_regex}}</textarea>
+                </div>
+
+                <div class="form-item-readonly">
+                    <label for="item_title_no">group number for item title*</label>
+                    <input type="number" id="item_title_no" name="item_title_no" min="1" max="3" value="{{item_title_no}}">
+                </div>
+
+                <div class="form-item-readonly">
+                    <label for="item_url_no">group number for item url</label>
+                    <input type="number" id="item_url_no" name="item_url_no" min="1" max="3" value="{{item_url_no}}">
+                </div>
+
+                <div class="form-item-readonly">
+                    <label for="item_content_no">group number for item content</label>
+                    <input type="number" id="item_content_no" name="item_content_no" min="1" max="3" value="{{item_content_no}}">
+                </div>
+
+                <div class="form-item">
+                    <label for="feed_title">feed title*</label>
+                    <input required type="text" id="feed_title" name="feed_title">
+                </div>
+
+                <div class="form-item">
+                    <label for="feed_url">feed url</label>
+                    <input type="url" id="feed_url" name="feed_url">
+                </div>
+
+                <div class="form-item">
+                    <label for="feed_desc">feed description</label>
+                    <textarea type="input" id="feed_desc" name="feed_desc"></textarea>
+                </div>
+
+                <button type="submit">Generate</button>
+            </form>
+        </div>
+    </main>
+    <footer>
+      <p>&copy 2024 max saparov | 🏳️‍⚧️</p>
+      <p>cookies are <span style="font-weight: bold;">never</span> collected or stored by this site.</p>
+      <p>~ i was here ~</p>
+    </footer>
+  </body>
+</html>
