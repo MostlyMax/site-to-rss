@@ -171,7 +171,7 @@ async fn rocket() -> _ {
     let client = aws_sdk_s3::Client::new(&config);
 
     rocket::build()
-        .mount("/", FileServer::from(relative!("public")))
+        .mount("/static", FileServer::from(relative!("static")))
         .mount("/", routes![health, index, generate_1, generate_2, generate_3, template_generate])
         .mount("/rss/", routes![get_rss])
         .mount("/api/", routes![api_generate])
