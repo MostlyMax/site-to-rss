@@ -56,6 +56,7 @@ async fn generate_2(form: Form<data::FormWiz1>) -> Result<Template, Template> {
     let Ok(re) = utils::convert_simple_regex(&form.items_regex) else {
         return Err(Template::render("form-wiz-1", context! {
             site_url: form.site_url.clone(),
+            items_regex: form.items_regex.clone(),
             site_html: text,
             error_msg: r#"<div class="form-item error"><p>
             Something went wrong parsing your item filter. Ensure that there
@@ -93,6 +94,7 @@ async fn generate_2(form: Form<data::FormWiz1>) -> Result<Template, Template> {
     if items_preview.len() == 0 {
         return Err(Template::render("form-wiz-1", context! {
             site_url: form.site_url.clone(),
+            items_regex: form.items_regex.clone(),
             site_html: text,
             error_msg: r#"<div class="form-item error"><p>
             Your item filter didn't find any matches. Ensure that there
