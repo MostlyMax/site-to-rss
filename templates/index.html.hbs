@@ -14,13 +14,19 @@
   <body>
     <main>
         <div class="full-content">
-            <h1>done!</h1>
-            <p>copy-paste this link into your rss reader of choice and it will fetch you the latest content from the site!</p>
-            <h3>https://site2rss.protolemon.com/rss/{{id_xml}}.xml</h3>
-            <h3>---</h3>
-            <p>this xml document is re-generated for every request so you will always have the most up-to-date
-                content for every refresh
-            </p>
+            <!--
+            struct FormWiz0 {
+                site_url: String,
+            }
+            this is a seperate index.html in case i want to render errors
+            -->
+          <h1>convert websites to rss</h1>
+          <h3>use simple filters on your favorite sites to generate xml documents for your personal rss feeds</h3>
+          <form action="/generate-1" method="post">
+            {{{error_msg}}}
+            <input required type="url" name="site_url" value="{{site_url}}" placeholder="enter a url to get started!"/>
+            <button type="submit">Start</button>
+          </form>
         </div>
     </main>
     <footer>

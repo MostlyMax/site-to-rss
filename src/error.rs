@@ -3,7 +3,7 @@ use aws_sdk_s3::error::SdkError;
 use aws_sdk_s3::primitives::ByteStreamError;
 use rocket::response::Responder;
 
-#[derive(Responder)]
+#[derive(Responder, Debug)]
 pub enum Error {
     #[response(status = 401)]
     BadRequest(String),

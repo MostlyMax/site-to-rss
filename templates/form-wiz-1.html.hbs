@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Site to RSS</title>
+    <meta name="description" content="TODO">
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" href="static/favicon.svg" type="images/x-icon">
+    <link rel="apple-touch-icon" href="static/favicon.svg" />
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+  </head>
+  <body>
+    <main>
+        <div class="form-content">
+          <h1>1</h1>
+          <h3>extracting key parts from the raw site source code<br>---</h3>
+            <!--
+            struct FormWiz0 {
+                site_url: String,
+            }
+            -->
+          <form action="/generate-2" method="post">
+              <div class="form-item-readonly">
+                  <label for="site_url">site url</label>
+                  <input type="url" name="site_url" value="{{site_url}}" readonly/>
+              </div>
+
+              {{{error_msg}}}
+
+              <div class="form-item">
+                <p>
+                Step 1 is to scroll through the raw site source code and find repeating chunks that
+                you want to extract as rss items. This is done with pattern matching using wildcards {*}
+                and selectors {%}. This can be a little confusing so feel free to take a look at the
+                <a href="#example-section">example below</a>.
+                </p>
+              </div>
+              <div class="form-item">
+              <label>here's a preview of the source code from your site:</label>
+              <div class="site-html">
+{{site_html}}
+              </div>
+              </div>
+
+              <div class="form-item">
+                <p>
+                  use the site html to capture items you are interested in (<a href="#example-section">see example below!</a>)
+                </p>
+                <p>
+                  • {*} is a wildcard for any string of words<br>
+                  • {%} will save a group of text for later use<br>
+                </p>
+              </div>
+              <div class="form-item">
+                  <label for="items_regex">item filter*</label>
+                  <textarea required type="input" id="items_regex" name="items_regex">{{items_regex}}</textarea>
+              </div>
+
+
+            <button type="submit">Next</button>
+
+
+            <div class="form-item">
+            <h3 id="example-section">example</h3>
+            <p>
+              say you are trying to pull out articles that look like this:<br><br>
+              &ltarticle&gt<br>
+              &lth2 id="nix-shell-template"&gt<br>
+              &lta href="https://plurrrr.com/archive/2023/07/07.html#nix-shell-template"&gtNix shell template&lt/a&gt<br>
+              ---
+            </p>
+            <p>
+              you could build a pattern to extract the parts you need with {%}:<br><br>
+              &ltarticle&gt<br>
+              &lth2 id="nix-shell-template"&gt<br>
+              &lta href="{%}"&gt{%}&lt/a&gt<br>
+              ---
+            </p>
+            <p>
+              but this will still only match on the heading with id="nix-shell-template" so we need to replace it in our filter with a wildcard {*}:<br><br>
+              &ltarticle&gt<br>
+              &lth2 id="{*}"&gt<br>
+              &lta href="{%}"&gt{%}&lt/a&gt<br>
+            </p>
+
+            </div>
+          </form>
+        </div>
+    </main>
+    <footer>
+      <p>&copy 2024 max saparov | 🏳️‍⚧️</p>
+      <p>cookies are <span style="font-weight: bold;">never</span> collected or stored by this site.</p>
+      <p>~ i was here ~</p>
+    </footer>
+  </body>
+</html>
