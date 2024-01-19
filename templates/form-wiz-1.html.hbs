@@ -22,6 +22,11 @@
             }
             -->
           <form action="/generate-2" method="post">
+              <div class="form-item-readonly">
+                  <label for="site_url">site url</label>
+                  <input type="url" name="site_url" value="{{site_url}}" readonly/>
+              </div>
+
               {{{error_msg}}}
 
               <div class="form-item">
@@ -51,10 +56,6 @@
               <div class="form-item">
                   <label for="items_regex">item filter*</label>
                   <textarea required type="input" id="items_regex" name="items_regex">{{items_regex}}</textarea>
-              </div>
-              <div class="form-item-readonly">
-                  <label for="site_url">site url</label>
-                  <input type="url" name="site_url" value="{{site_url}}" readonly/>
               </div>
 
 

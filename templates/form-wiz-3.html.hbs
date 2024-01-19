@@ -15,7 +15,7 @@
     <main>
         <div class="form-content">
             <h1>3</h1>
-            <h3>use simple filters on your favorite sites to generate xml documents for your personal rss feeds<br>---</h3>
+            <h3>fill out metadata used in the rss reader<br>---</h3>
             <!--
             pub struct FormWiz2 {
                 pub site_url: String,
@@ -31,24 +31,31 @@
                     <input type="url" name="site_url" value="{{site_url}}" readonly/>
                 </div>
 
-                <div class="form-item-readonly">
+                <div class="form-item-readonly" style="display: none;">
                     <label for="items_regex">item filter*</label>
                     <textarea type="input" id="items_regex" name="items_regex" readonly>{{items_regex}}</textarea>
                 </div>
 
-                <div class="form-item-readonly">
+                <div class="form-item-readonly" style="display: none;">
                     <label for="item_title_no">group number for item title*</label>
                     <input type="number" id="item_title_no" name="item_title_no" min="1" max="3" value="{{item_title_no}}">
                 </div>
 
-                <div class="form-item-readonly">
+                <div class="form-item-readonly" style="display: none;">
                     <label for="item_url_no">group number for item url</label>
                     <input type="number" id="item_url_no" name="item_url_no" min="1" max="3" value="{{item_url_no}}">
                 </div>
 
-                <div class="form-item-readonly">
+                <div class="form-item-readonly" style="display: none;">
                     <label for="item_content_no">group number for item content</label>
                     <input type="number" id="item_content_no" name="item_content_no" min="1" max="3" value="{{item_content_no}}">
+                </div>
+
+                 <div class="form-item">
+                  <p>
+                  This is the last step! Fill in the metadata values that will be shown in your rss reader for this feed. Feel free
+                  to input any values that make sense to you!
+                  </p>
                 </div>
 
                 <div class="form-item">
