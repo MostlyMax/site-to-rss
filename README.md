@@ -21,6 +21,9 @@ their rss feed updated as soon as the site is changed so it would be smart to ca
 couple hours. This would also make it load MUCH faster as it could be cached on the edge (closer to them) and wouldn't
 have to be generated in real time.
 
+Lastly, there is a fancy new tool that's pretty good at parsing code and language! It would be interesting to
+see if this entire form could just be autofilled using Kagi's [fast gpt api](https://kagi.com/fastgpt).
+
 ### Design Ideas
 these are just some of the notes I took during the beginning of the project. It's mostly word vomit but I'll leave it
 here for now.
