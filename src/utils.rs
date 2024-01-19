@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use aws_sdk_s3::Client;
+use once_cell::sync::Lazy;
 use regex::Regex;
 use rocket::State;
 use crate::{error::Error, data::RssGenData};
@@ -14,10 +15,15 @@ pub fn is_xml(path: &PathBuf) -> bool {
 pub fn convert_simple_regex(input: &str) -> Result<Regex, Error> {
     let items_re = input.lines().collect::<String>();
     let items_re = items_re.replace("{%}", "(.*?)");
-    let items_re = items_re.replace("{*}", ".+?");
+    let items_re = items_re.replace("{*}", ".*?");
     let items_re = items_re.replace(r"\", r"\\");
     let items_re = items_re.replace("/", r"\/");
-    let items_re = items_re.replace(">", r">\s*?");
+    let items_re = items_re.replace("\n", "");
+    let items_re = items_re.replace("\r", "");
+    let items_re = items_re.replace("\t", "");
+
+    static RE: Lazy<Regex> = Lazy::new(|| Regex::new(r">\s+<").unwrap());
+    let items_re = RE.replace_all(&items_re, "><").to_string();
 
     let items_re = format!("(?ms){}", items_re);
 
@@ -35,6 +41,8 @@ pub async fn get_site_text(url: &str) -> Result<String, Error> {
     }
     let text = response.text().await?;
 
+    static RE: Lazy<Regex> = Lazy::new(|| Regex::new(r">\s+<").unwrap());
+    let text = RE.replace_all(&text, "><").to_string();
     let text = text.replace("\n", "");
     let text = text.replace("\r", "");
     let text = text.replace("\t", "");
