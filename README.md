@@ -24,7 +24,7 @@ have to be generated in real time.
 Lastly, there is a fancy new tool that's pretty good at parsing code and language! It would be interesting to
 see if this entire form could just be autofilled using Kagi's [fast gpt api](https://kagi.com/fastgpt).
 
-### Design Ideas
+## Design Ideas
 these are just some of the notes I took during the beginning of the project. It's mostly word vomit but I'll leave it
 here for now.
 
