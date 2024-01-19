@@ -9,8 +9,17 @@ It was done using zero javascript just for the love of the challenge and... my h
 everything is rendered on the backend through [rocket rs](https://rocket.rs/) which I mostly used because
 it seemed blazingly fast and interesting, so I decided to learn something new.
 
-Everything (mostly) is deployed on aws via terraform.
+(Mostly) everything is deployed on aws via terraform.
 
+## what now?
+There are a lot of incomplete things. Namely, backend rendering with easy usability is tough. There are
+definitely better frameworks for template rendering and certainly some spots that might call for client-side
+javascript.
+
+Other interesting directions would be to implement some smart caching behavior. Users are unlikely to need
+their rss feed updated as soon as the site is changed so it would be smart to cache the xml document for a
+couple hours. This would also make it load MUCH faster as it could be cached on the edge (closer to them) and wouldn't
+have to be generated in real time.
 
 ### Design Ideas
 these are just some of the notes I took during the beginning of the project. It's mostly word vomit but I'll leave it
