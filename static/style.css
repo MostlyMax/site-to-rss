@@ -65,6 +65,20 @@ h1, h2, h3, p, label {
     background-color: var(--secondary-bg-color);
 }
 
+.group-box {
+    width: 100%;
+    border-style: solid;
+    border-width: 1px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: var(--secondary-bg-color);
+}
+
+.form-content .group-box p {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
 .items-preview {
     border-style: solid;
     border-width: 1px;
