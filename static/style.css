@@ -38,8 +38,14 @@ h1, h2, h3, p, label {
 }
 
 .full-content h3 {
-    word-break: break-all ;
     padding: 0px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.full-content p {
+    max-width: 600px;
+    text-align: center;
 }
 
 .full-content input {
@@ -63,6 +69,20 @@ h1, h2, h3, p, label {
     padding: 10px;
     border-radius: 5px;
     background-color: var(--secondary-bg-color);
+}
+
+.group-box {
+    width: 100%;
+    border-style: solid;
+    border-width: 1px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: var(--secondary-bg-color);
+}
+
+.form-content .group-box p {
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
 
 .items-preview {
@@ -95,7 +115,7 @@ h1, h2, h3, p, label {
     margin-bottom: 20px;
 }
 
-.form-content h1 {
+h1 {
     font-size: 64px;
     margin: 20px;
     padding: 0px;
@@ -201,6 +221,10 @@ footer p {
 
 @media screen and (max-width: 840px) {
     .form-content {
+        width: 100%;
+    }
+
+    .full-content input {
         width: 100%;
     }
 
