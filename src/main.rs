@@ -164,7 +164,6 @@ async fn get_rss(id_xml: PathBuf, client: &State<Client>) -> Result<String, Erro
 
     let mut items = Vec::new();
     for capture in rss_gen_data.items_regex.captures_iter(&text) {
-        eprintln!("{:#?}", capture);
         let item_title = capture
             .get(rss_gen_data.item_title_no)
             .and_then(|s| Some(s.as_str().to_owned()));
