@@ -1,7 +1,11 @@
 use async_openai::{types::{ChatCompletionRequestAssistantMessageArgs, ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestUserMessageArgs, CreateChatCompletionRequestArgs}, Client};
+use once_cell::sync::Lazy;
+use regex::Regex;
 
 pub async fn autofill_test(text: &String) -> Option<String>{
-    let Some((_, body)) = text.split_once("<body>") else {
+    static RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"<.*?body.*?>").unwrap());
+
+    let Some(body) = RE.split(text).nth(1) else {
         return None;
     };
 
@@ -105,6 +109,7 @@ r##"
         .unwrap();
 
     let response = client.chat().create(request).await.unwrap();
+    eprintln!("{:?}", response);
 
     response.choices[0].message.content.clone()
 }
