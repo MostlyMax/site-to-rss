@@ -1,4 +1,4 @@
-use async_openai::{config::OpenAIConfig, types::{ChatCompletionRequestAssistantMessageArgs, ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestUserMessageArgs, CreateChatCompletionRequestArgs}, Client};
+use async_openai::{types::{ChatCompletionRequestAssistantMessageArgs, ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestUserMessageArgs, CreateChatCompletionRequestArgs}, Client};
 
 pub async fn autofill_test(text: &String) -> Option<String>{
     let Some((_, body)) = text.split_once("<body>") else {
