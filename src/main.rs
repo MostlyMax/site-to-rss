@@ -105,6 +105,8 @@ async fn generate_2(form: Form<data::FormWiz1>) -> Result<Template, Template> {
     };
 
     if items_preview.len() == 0 {
+        let text = text.replace("><", ">\n<");
+
         return Err(Template::render("form-wiz-1", context! {
             site_url: form.site_url.clone(),
             items_regex: form.items_regex.clone(),
