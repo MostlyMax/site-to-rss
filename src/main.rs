@@ -65,6 +65,8 @@ async fn generate_2(form: Form<data::FormWiz1>) -> Result<Template, Template> {
         .expect("this should never fail if its the same url as used in generate_1");
 
     let Ok(re) = utils::convert_simple_regex(&form.items_regex) else {
+        let text = text.replace("><", ">\n<");
+
         return Err(Template::render("form-wiz-1", context! {
             site_url: form.site_url.clone(),
             items_regex: form.items_regex.clone(),
