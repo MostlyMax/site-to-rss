@@ -44,6 +44,7 @@ pub struct RssGenData {
     pub site_url: String,
     #[serde(with = "serde_regex")]
     pub items_regex: Regex,
+    pub raw_items_regex: String,
     pub feed_title: String,
     pub feed_url: Option<String>,
     pub feed_desc: Option<String>,
@@ -62,6 +63,7 @@ impl TryFrom<Form<FormWizGenerate>> for RssGenData {
         Ok(RssGenData {
             id,
             items_regex,
+            raw_items_regex: value.items_regex.clone(),
             site_url: value.site_url.clone(),
             feed_title: value.feed_title.clone(),
             feed_url: value.feed_url.clone(),

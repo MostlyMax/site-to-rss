@@ -14,6 +14,7 @@ use std::path::PathBuf;
 mod error;
 mod data;
 mod utils;
+mod openai;
 
 use error::Error;
 use data::{FormWizGenerate, RssGenData};
@@ -46,6 +47,16 @@ async fn generate_1(form: Form<data::FormWiz0>) -> Result<Template, Template> {
         site_url: form.site_url.clone(),
         site_html: text
     }))
+}
+
+#[get("/autofill?<url>")]
+async fn autofill(url: String) -> Option<String> {
+    let Ok(text) = utils::get_site_text(&url).await else {
+        return None
+    };
+
+    let text = text.replace("><", ">\n<");
+    openai::autofill_test(&text).await
 }
 
 #[post("/generate-2", data = "<form>")]
@@ -208,7 +219,7 @@ async fn rocket() -> _ {
         .mount("/static", FileServer::from(relative!("static")))
         .mount("/", routes![health, index, generate_1, generate_2, generate_3, template_generate])
         .mount("/rss/", routes![get_rss])
-        .mount("/api/", routes![api_generate])
+        .mount("/api/", routes![api_generate, autofill])
         .attach(Template::fairing())
         .manage(client)
 }
