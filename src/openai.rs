@@ -109,7 +109,6 @@ r##"
         .unwrap();
 
     let response = client.chat().create(request).await.unwrap();
-    eprintln!("{:?}", response);
 
     response.choices[0].message.content.clone()
 }

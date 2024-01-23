@@ -9,7 +9,6 @@ autofillButton.addEventListener('click', async () => {
 
     await fetch(`/api/autofill?url=${encodeURIComponent(url)}`).then(async (resp) => {
         const text = await resp.text();
-        console.log(text);
         regexForm.value = text;
         spinner.style.display = 'none';
         autofillButton.style.backgroundColor = '#d5def7';
