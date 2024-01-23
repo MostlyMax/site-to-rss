@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate rocket;
+use regex::Regex;
 use rocket::{form::Form, State};
 use rocket::fs::{FileServer, relative};
 use rocket_dyn_templates::{Template, context};
@@ -50,37 +51,32 @@ async fn generate_1(form: Form<data::FormWiz0>) -> Result<Template, Template> {
 }
 
 #[get("/autofill?<url>")]
-async fn autofill(url: String) -> Option<String> {
+async fn autofill(url: String) -> Result<String, Error> {
     let Ok(text) = utils::get_site_text(&url).await else {
-        return None
+        return Err(Error::Other("Unable to get site text".to_owned()));
     };
 
-    let text = text.replace("><", ">\n<");
-    openai::autofill_test(&text).await
+    let text_clean = text.replace("><", ">\n<");
+
+    let Some(resp) = openai::autofill_test(&text_clean).await else {
+        return Err(Error::Other("Unable to get openai response".to_owned()));
+    };
+    let Ok(re) = utils::convert_simple_regex(&resp) else {
+        return Err(Error::Other("Unable to parse openai regex".to_owned()));
+    };
+
+    let items_preview = generate_preview(re, &text);
+    if items_preview.is_empty() {
+        return Err(Error::Other("openai regex returned no matches".to_owned()));
+    }
+
+    Ok(resp)
 }
 
-#[post("/generate-2", data = "<form>")]
-async fn generate_2(form: Form<data::FormWiz1>) -> Result<Template, Template> {
-    let text = utils::get_site_text(&form.site_url).await
-        .expect("this should never fail if its the same url as used in generate_1");
-
-    let Ok(re) = utils::convert_simple_regex(&form.items_regex) else {
-        let text = text.replace("><", ">\n<");
-
-        return Err(Template::render("form-wiz-1", context! {
-            site_url: form.site_url.clone(),
-            items_regex: form.items_regex.clone(),
-            site_html: text,
-            error_msg: r#"<div class="form-item error"><p>
-            Something went wrong parsing your item filter. Ensure that there
-            are no typos or extra brackets laying around!
-            </p></div>"#
-        }));
-    };
-
+fn generate_preview(re: Regex, text: &String) -> Vec<(usize, String)> {
     let mut items_preview = Vec::new();
 
-    if let Some(first_cap) = re.captures_iter(&text).next() {
+    if let Some(first_cap) = re.captures_iter(text).next() {
         const MAX_GROUPS: usize = 10;
         let mut current_group_no = 0;
 
@@ -103,6 +99,30 @@ async fn generate_2(form: Form<data::FormWiz1>) -> Result<Template, Template> {
             current_group_no += 1;
         }
     };
+
+    items_preview
+}
+
+#[post("/generate-2", data = "<form>")]
+async fn generate_2(form: Form<data::FormWiz1>) -> Result<Template, Template> {
+    let text = utils::get_site_text(&form.site_url).await
+        .expect("this should never fail if its the same url as used in generate_1");
+
+    let Ok(re) = utils::convert_simple_regex(&form.items_regex) else {
+        let text = text.replace("><", ">\n<");
+
+        return Err(Template::render("form-wiz-1", context! {
+            site_url: form.site_url.clone(),
+            items_regex: form.items_regex.clone(),
+            site_html: text,
+            error_msg: r#"<div class="form-item error"><p>
+            Something went wrong parsing your item filter. Ensure that there
+            are no typos or extra brackets laying around!
+            </p></div>"#
+        }));
+    };
+
+    let items_preview = generate_preview(re, &text);
 
     if items_preview.len() == 0 {
         let text = text.replace("><", ">\n<");

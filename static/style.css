@@ -56,7 +56,7 @@ h1, h2, h3, p, label {
 }
 
 .full-content .error {
-    width: 40%;
+    max-width: 40%;
 }
 
 .site-html {
@@ -191,6 +191,7 @@ form button:hover {
     border-style: solid;
     padding: 5px;
     font-style: italic;
+    max-width: fill;
 }
 
 .form-item label, .form-item-readonly label {
@@ -212,7 +213,7 @@ form button:hover {
 
 .autofill button {
     margin: 5px;
-    width: 250px;
+    min-width: 250px;
 }
 
 .autofill button:focus {

@@ -26,10 +26,11 @@ pub async fn autofill_test(text: &String) -> Option<String>{
                 .unwrap()
                 .into(),
             ChatCompletionRequestSystemMessageArgs::default()
-                .content("However, use {*} as the wildcard instead of .*? and {%} as capture groups instead of (.*?). \
-                          Use at most only 3 {%} capture groups and simply discard repeated information with {*}. \
-                          Simplicity is key here, use as little hard coded html information (class, id, etc...) and
-                          explicit content as possible.")
+                .content(r##"However, use {*} as the wildcard instead of .*? and {%} as capture groups instead of (.*?). \
+                          Try to use at most only 5 {%} capture groups and simply discard unecessary information \
+                          such as style with {*}. For example,  <a style="font-size: 1.3rem;" href="https://blog.meain.io/2023/what-is-in-dot-git/" target="_blank"> \
+                          would become <a style="{*}" href="{%}" target="{*}">. \
+                          Simplicity is key here, get rid of as much hardcoded information with {*} as possible."##)
                 .build()
                 .unwrap()
                 .into(),
