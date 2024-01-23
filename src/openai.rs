@@ -3,14 +3,14 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 
 pub async fn autofill_test(text: &String) -> Option<String>{
-    static RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"<.*?body.*?>").unwrap());
+    static RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"<body.*?>").unwrap());
 
     let Some(body) = RE.split(text).nth(1) else {
         return None;
     };
 
     let mut body = body.to_string();
-    body.truncate(8000);
+    body.truncate(10000);
 
     let client = Client::new();
 
