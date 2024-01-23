@@ -173,6 +173,13 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
             }
         ]
 
+        secrets = [
+            {
+                valueFrom = "arn:aws:secretsmanager:us-east-1:917404528856:secret:openai/kagi-demo-0BegBw"
+                name      = "OPENAI_API_KEY"
+            }
+        ]
+
         logConfiguration = {
             logDriver = "awslogs"
 
