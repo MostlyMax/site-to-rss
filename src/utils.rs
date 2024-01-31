@@ -66,8 +66,6 @@ pub async fn get_gen_data(id_xml: PathBuf, client: &State<Client>) -> Result<Rss
         return Err(Error::NotFound("File not found".to_owned()));
     };
 
-    eprintln!("{}", id);
-
     let obj = client.get_object()
         .bucket("max-public-bucket")
         .key(id)

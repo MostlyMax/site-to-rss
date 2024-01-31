@@ -1,7 +1,8 @@
 use std::str::Utf8Error;
-use aws_sdk_s3::error::SdkError;
 use aws_sdk_s3::primitives::ByteStreamError;
+use aws_sdk_s3::Error as S3Error;
 use rocket::response::Responder;
+use std::fmt::Debug;
 
 #[derive(Responder, Debug)]
 pub enum Error {
@@ -29,11 +30,27 @@ impl From<reqwest::Error> for Error {
     }
 }
 
-impl<E, R> From<SdkError<E, R>> for Error {
-    fn from(_: SdkError<E, R>) -> Self {
+
+
+impl From<aws_sdk_s3::Error> for Error {
+    fn from(e: aws_sdk_s3::Error) -> Self {
         let error = Error::Other("AWS SDK Error".to_owned());
 
-        error
+        match e {
+            S3Error::NoSuchKey(_) => Error::NotFound("unable to find xml object".to_owned()),
+            S3Error::NoSuchBucket(_) => Error::NotFound("unable to find xml object".to_owned()),
+            S3Error::NotFound(_) => Error::NotFound("unable to find xml object".to_owned()),
+            _ => error,
+        }
+    }
+}
+
+impl<E, R> From<aws_sdk_s3::error::SdkError<E, R>> for Error
+    where aws_sdk_s3::Error: From<aws_sdk_s3::error::SdkError<E, R>> {
+
+    fn from(e: aws_sdk_s3::error::SdkError<E, R>) -> Self {
+        let error = aws_sdk_s3::Error::from(e);
+        error.into()
     }
 }
 
