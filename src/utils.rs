@@ -6,12 +6,22 @@ use regex::Regex;
 use rocket::State;
 use crate::{error::Error, data::RssGenData};
 
+/// Utility function to check if the extenstion of a file is .xml
 pub fn is_xml(path: &PathBuf) -> bool {
     path.extension()
         .map(|s| s == "xml")
         .unwrap_or(false)
 }
 
+/// Converts the simple templating into regex. Uses the following rules:
+/// -       {*}      => .*?
+/// -       {%}      => (.*?)
+/// -       \        => \\ [theres something weird about escape sequeces when converting html body to string]
+/// -       /        => \/ [same as above]
+/// -       \n       => removed
+/// -       \r       => removed
+/// -       \t       => removed
+/// -  >[white space] => ><
 pub fn convert_simple_regex(input: &str) -> Result<Regex, Error> {
     let items_re = input.lines().collect::<String>();
     let items_re = items_re.replace("{%}", "(.*?)");
@@ -34,6 +44,7 @@ pub fn convert_simple_regex(input: &str) -> Result<Regex, Error> {
     Ok(re)
 }
 
+/// utility function to download html from site and format nicely
 pub async fn get_site_text(url: &str) -> Result<String, Error> {
     let response = reqwest::get(url).await?;
     if !response.status().is_success() {
@@ -50,6 +61,7 @@ pub async fn get_site_text(url: &str) -> Result<String, Error> {
     Ok(text)
 }
 
+/// does the same as get_site_text but without allocating and returning the string
 pub async fn get_site_text_dry(url: &str) -> Result<(), Error> {
     let response = reqwest::get(url).await?;
     let _ = response.text().await?;
@@ -57,6 +69,7 @@ pub async fn get_site_text_dry(url: &str) -> Result<(), Error> {
     Ok(())
 }
 
+/// downloads the s3 config object then generates the xml document from the site and regex rules
 pub async fn get_gen_data(id_xml: PathBuf, client: &State<Client>) -> Result<RssGenData, Error> {
     if !is_xml(&id_xml) {
         return Err(Error::NotFound("Expected xml file".to_owned()));
