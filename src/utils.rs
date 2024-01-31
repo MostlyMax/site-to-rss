@@ -38,7 +38,7 @@ pub fn convert_simple_regex(input: &str) -> Result<Regex, Error> {
     let items_re = format!("(?ms){}", items_re);
 
     let Ok(re) = Regex::new(&items_re) else {
-        return Err(Error::BadRequest("Invalid regex".to_owned()));
+        return Err(Error::BadRequest("Invalid regex"));
     };
 
     Ok(re)
@@ -48,7 +48,7 @@ pub fn convert_simple_regex(input: &str) -> Result<Regex, Error> {
 pub async fn get_site_text(url: &str) -> Result<String, Error> {
     let response = reqwest::get(url).await?;
     if !response.status().is_success() {
-        return Err(Error::BadRequest("Bad url".to_owned()));
+        return Err(Error::BadRequest("Bad url"));
     }
     let text = response.text().await?;
 
@@ -72,11 +72,11 @@ pub async fn get_site_text_dry(url: &str) -> Result<(), Error> {
 /// downloads the s3 config object then generates the xml document from the site and regex rules
 pub async fn get_gen_data(id_xml: PathBuf, client: &State<Client>) -> Result<RssGenData, Error> {
     if !is_xml(&id_xml) {
-        return Err(Error::NotFound("Expected xml file".to_owned()));
+        return Err(Error::NotFound("Expected xml file"));
     }
 
     let Some(id) = id_xml.file_stem().and_then(|s| s.to_str()) else {
-        return Err(Error::NotFound("File not found".to_owned()));
+        return Err(Error::NotFound("File not found"));
     };
 
     let obj = client.get_object()
@@ -90,4 +90,34 @@ pub async fn get_gen_data(id_xml: PathBuf, client: &State<Client>) -> Result<Rss
     let rss_gen_data = serde_json::from_str(response)?;
 
     Ok(rss_gen_data)
+}
+
+pub fn generate_preview(re: Regex, text: &String) -> Vec<(usize, String)> {
+    let mut items_preview = Vec::new();
+
+    if let Some(first_cap) = re.captures_iter(text).next() {
+        const MAX_GROUPS: usize = 10;
+        let mut current_group_no = 0;
+
+        for group in first_cap.iter() {
+            if current_group_no >= MAX_GROUPS { break }
+
+            // 0th group contains full match
+            if current_group_no <= 0 {
+                current_group_no += 1;
+                continue
+            }
+
+            items_preview.push((
+                current_group_no,
+                group
+                    .and_then(|s| Some(s.as_str().to_string()))
+                    .unwrap_or_default()
+            ));
+
+            current_group_no += 1;
+        }
+    };
+
+    items_preview
 }

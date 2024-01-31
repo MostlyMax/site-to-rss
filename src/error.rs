@@ -7,23 +7,29 @@ use std::fmt::Debug;
 #[derive(Responder, Debug)]
 pub enum Error {
     #[response(status = 401)]
-    BadRequest(String),
+    BadRequest(&'static str),
     #[response(status = 404)]
-    NotFound(String),
+    NotFound(&'static str),
     #[response(status = 500)]
-    Other(String),
+    Other(&'static str),
+}
+
+pub struct TemplateWithError {
+    name: &'static str,
+    msg: &'static str,
+    error: Error
 }
 
 impl From<reqwest::Error> for Error {
     fn from(e: reqwest::Error) -> Self {
-        let mut error = Error::Other("Unknown error".to_owned());
+        let mut error = Error::Other("Unknown error");
 
         if e.is_connect() || e.is_redirect() || e.is_timeout() {
-            error = Self::BadRequest("unable to connect to site url".to_owned());
+            error = Self::BadRequest("unable to connect to site url");
         }
 
         else if e.is_body() || e.is_decode() {
-            error = Self::BadRequest("unable to decode site body".to_owned());
+            error = Self::BadRequest("unable to decode site body");
         }
 
         error
@@ -34,12 +40,12 @@ impl From<reqwest::Error> for Error {
 
 impl From<aws_sdk_s3::Error> for Error {
     fn from(e: aws_sdk_s3::Error) -> Self {
-        let error = Error::Other("AWS SDK Error".to_owned());
+        let error = Error::Other("AWS SDK Error");
 
         match e {
-            S3Error::NoSuchKey(_) => Error::NotFound("unable to find xml object".to_owned()),
-            S3Error::NoSuchBucket(_) => Error::NotFound("unable to find xml object".to_owned()),
-            S3Error::NotFound(_) => Error::NotFound("unable to find xml object".to_owned()),
+            S3Error::NoSuchKey(_) => Error::NotFound("unable to find xml object"),
+            S3Error::NoSuchBucket(_) => Error::NotFound("unable to find xml object"),
+            S3Error::NotFound(_) => Error::NotFound("unable to find xml object"),
             _ => error,
         }
     }
@@ -56,7 +62,7 @@ impl<E, R> From<aws_sdk_s3::error::SdkError<E, R>> for Error
 
 impl From<ByteStreamError> for Error {
     fn from(_: ByteStreamError) -> Self {
-        let error = Error::Other("ByteStream Error".to_owned());
+        let error = Error::Other("ByteStream Error");
 
         error
     }
@@ -64,7 +70,7 @@ impl From<ByteStreamError> for Error {
 
 impl From<Utf8Error> for Error {
     fn from(_: Utf8Error) -> Self {
-        let error = Error::Other("UTF-8 Error".to_owned());
+        let error = Error::Other("UTF-8 Error");
 
         error
     }
@@ -72,7 +78,7 @@ impl From<Utf8Error> for Error {
 
 impl From<serde_json::Error> for Error {
     fn from(_: serde_json::Error) -> Self {
-        let error = Error::Other("serialization Error".to_owned());
+        let error = Error::Other("serialization Error");
 
         error
     }
