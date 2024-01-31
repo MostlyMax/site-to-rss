@@ -8,6 +8,7 @@ COPY Cargo.lock ./
 RUN cargo build --release
 
 COPY static ./static/
+COPY prompts ./prompts/
 COPY templates ./templates/
 COPY Rocket.toml ./
 
