@@ -19,6 +19,8 @@ mod openai;
 use error::Error;
 use data::{FormWizGenerate, RssGenData};
 
+use crate::error::build_error_html;
+
 
 #[get("/health")]
 fn health() -> &'static str {
@@ -35,9 +37,9 @@ async fn generate_1(form: Form<data::FormWiz0>) -> Result<Template, Template> {
     let Ok(text) = utils::get_site_text(&form.site_url).await else {
         return Err(Template::render("index", context! {
             site_url: form.site_url.clone(),
-            error_msg: r#"<div class="form-item error"><p>
-            Unable to download site! Check for any typos and make sure the link works!
-            </p></div>"#
+            error_msg: build_error_html(
+                "Unable to download site! Check for any typos and make sure the link works!"
+            )
         }));
     };
 
@@ -80,10 +82,10 @@ async fn generate_2(form: Form<data::FormWiz1>) -> Result<Template, Template> {
             site_url: form.site_url.clone(),
             items_regex: form.items_regex.clone(),
             site_html: text,
-            error_msg: r#"<div class="form-item error"><p>
-            Something went wrong parsing your item filter. Ensure that there
-            are no typos or extra brackets laying around!
-            </p></div>"#
+            error_msg: build_error_html(
+               "Something went wrong parsing your item filter. Ensure that there \
+               are no typos or extra brackets laying around!"
+            )
         }));
     };
 
@@ -96,10 +98,10 @@ async fn generate_2(form: Form<data::FormWiz1>) -> Result<Template, Template> {
             site_url: form.site_url.clone(),
             items_regex: form.items_regex.clone(),
             site_html: text,
-            error_msg: r#"<div class="form-item error"><p>
-            Your item filter didn't find any matches. Ensure that there
-            are no typos or extra brackets laying around and try again!
-            </p></div>"#
+            error_msg: build_error_html(
+                "Your item filter didn't find any matches. Ensure that there \
+                are no typos or extra brackets laying around and try again!"
+            )
         }));
     }
 
@@ -175,7 +177,6 @@ async fn api_generate(form: Form<FormWizGenerate>, client: &State<Client>) -> Re
 async fn template_generate(form: Form<FormWizGenerate>, client: &State<Client>) -> Result<Template, Error> {
     let id_xml = generate(form, client).await?;
 
-    eprintln!("{}", id_xml);
     Ok(Template::render("generate", context! { id_xml: id_xml }))
 }
 
@@ -190,8 +191,7 @@ async fn generate(form: Form<FormWizGenerate>, client: &State<Client>) -> Result
         .key(rss_gen_data.id)
         .body(serialized_data.into_bytes().into())
         .send()
-        .await
-        .unwrap();
+        .await?;
 
     Ok(rss_gen_data.id.to_string())
 }

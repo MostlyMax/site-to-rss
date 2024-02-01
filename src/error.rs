@@ -4,6 +4,7 @@ use aws_sdk_s3::Error as S3Error;
 use rocket::response::Responder;
 use std::fmt::Debug;
 
+
 #[derive(Responder, Debug)]
 pub enum Error {
     #[response(status = 401)]
@@ -14,10 +15,11 @@ pub enum Error {
     Other(&'static str),
 }
 
-pub struct TemplateWithError {
-    name: &'static str,
-    msg: &'static str,
-    error: Error
+pub fn build_error_html(msg: &'static str) -> String {
+    format!(
+        r#"<div class="form-item error"><p>{}</p></div>"#,
+        msg
+    )
 }
 
 impl From<reqwest::Error> for Error {
@@ -35,8 +37,6 @@ impl From<reqwest::Error> for Error {
         error
     }
 }
-
-
 
 impl From<aws_sdk_s3::Error> for Error {
     fn from(e: aws_sdk_s3::Error) -> Self {
