@@ -55,16 +55,14 @@ async fn generate_1(form: Form<data::FormWiz0>) -> Result<Template, Template> {
 async fn autofill(url: String) -> Result<String, Error> {
     let text = utils::get_site_text(url).await?;
     let text_readable = text.replace("><", ">\n<");
-
-    let Some(resp) = openai::autofill_test(&text_readable).await else {
-        return Err(Error::Other("Unable to get openai response"));
-    };
+    let resp = openai::autofill_test(&text_readable).await?;
 
     let re = utils::convert_simple_regex(&resp)?;
 
     let items_preview = utils::generate_preview(re, &text);
+
     if items_preview.is_empty() {
-        return Err(Error::Other("openai regex returned no matches"));
+        return Err(Error::UnhelpfulAI(resp));
     }
 
     Ok(resp)

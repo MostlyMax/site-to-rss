@@ -1,4 +1,5 @@
 use std::str::Utf8Error;
+use async_openai::error::OpenAIError;
 use aws_sdk_s3::primitives::ByteStreamError;
 use aws_sdk_s3::Error as S3Error;
 use rocket::response::Responder;
@@ -7,10 +8,12 @@ use std::fmt::Debug;
 
 #[derive(Responder, Debug)]
 pub enum Error {
-    #[response(status = 401)]
+    #[response(status = 400)]
     BadRequest(&'static str),
     #[response(status = 404)]
     NotFound(&'static str),
+    #[response(status = 406)]
+    UnhelpfulAI(String),
     #[response(status = 500)]
     Other(&'static str),
 }
@@ -25,6 +28,21 @@ pub fn build_error_html(msg: &'static str) -> String {
 impl From<regex::Error> for Error {
     fn from(_: regex::Error) -> Self {
         Self::BadRequest("unable to parse regex")
+    }
+}
+
+impl From<OpenAIError> for Error {
+    fn from(_: OpenAIError) -> Self {
+        Self::Other("openai api error")
+        // match e {
+        //     OpenAIError::Reqwest(_) => todo!(),
+        //     OpenAIError::ApiError(_) => todo!(),
+        //     OpenAIError::JSONDeserialize(_) => todo!(),
+        //     OpenAIError::FileSaveError(_) => todo!(),
+        //     OpenAIError::FileReadError(_) => todo!(),
+        //     OpenAIError::StreamError(_) => todo!(),
+        //     OpenAIError::InvalidArgument(_) => todo!(),
+        // }
     }
 }
 

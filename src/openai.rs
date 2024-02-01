@@ -3,6 +3,8 @@ use async_openai::{types::{ChatCompletionRequestAssistantMessageArgs, ChatComple
 use once_cell::sync::Lazy;
 use regex::Regex;
 
+use crate::error::Error;
+
 // There may be a simpler way of creating these lazy strings (maybe caching?)
 fn get_system_prompt() -> Lazy<String> {
     Lazy::new(|| {
@@ -41,12 +43,12 @@ fn get_assistant_prompt() -> Lazy<String> {
 }
 
 
-pub async fn autofill_test(text: &String) -> Option<String>{
+pub async fn autofill_test(text: &String) -> Result<String, Error> {
     static RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"<body.*?>")
         .expect("this is hard-coded, if it breaks i am silly"));
 
     let Some(body) = RE.split(text).nth(1) else {
-        return None;
+        return Err(Error::BadRequest("no body in html"));
     };
 
     let mut body = body.to_string();
@@ -60,29 +62,24 @@ pub async fn autofill_test(text: &String) -> Option<String>{
         .messages([
             ChatCompletionRequestSystemMessageArgs::default()
                 .content(get_system_prompt().to_string())
-                .build()
-                .ok()?
+                .build()?
                 .into(),
             ChatCompletionRequestUserMessageArgs::default()
                 .content(get_user_prompt().to_string())
-                .build()
-                .ok()?
+                .build()?
                 .into(),
             ChatCompletionRequestAssistantMessageArgs::default()
                 .content(get_assistant_prompt().to_string())
-                .build()
-                .ok()?
+                .build()?
                 .into(),
             ChatCompletionRequestUserMessageArgs::default()
                 .content(body)
-                .build()
-                .ok()?
+                .build()?
                 .into(),
         ])
-        .build()
-        .ok()?;
+        .build()?;
 
-    let response = client.chat().create(request).await.ok()?;
+    let response = client.chat().create(request).await?;
 
-    response.choices[0].message.content.clone()
+    Ok(response.choices[0].message.content.clone().unwrap_or_default())
 }
