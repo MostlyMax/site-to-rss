@@ -38,7 +38,7 @@ pub struct FormWizGenerate {
     pub feed_desc: Option<String>
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RssGenData {
     pub id: Uuid,
     pub site_url: String,

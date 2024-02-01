@@ -46,7 +46,7 @@ pub fn convert_simple_regex(input: &str) -> Result<Regex, Error> {
 }
 
 /// utility function to download html from site and format nicely
-#[cached(size=32, result = true)]
+#[cached(size = 16, time = 900, result = true)]
 pub async fn get_site_text(url: String) -> Result<String, Error> {
     let response = reqwest::get(url).await?;
     if !response.status().is_success() {
@@ -64,7 +64,7 @@ pub async fn get_site_text(url: String) -> Result<String, Error> {
 }
 
 /// does the same as get_site_text but without allocating and returning the string
-#[cached(size=16, result = true)]
+#[cached(size = 16, time = 900, result = true)]
 pub async fn get_site_text_dry(url: String) -> Result<(), Error> {
     let response = reqwest::get(url).await?;
     let _ = response.text().await?;
@@ -72,7 +72,8 @@ pub async fn get_site_text_dry(url: String) -> Result<(), Error> {
     Ok(())
 }
 
-/// downloads the s3 config object then generates the xml document from the site and regex rules
+/// downloads the s3 config object
+#[cached(size=64, result = true, key = "PathBuf", convert = "{ id_xml.clone() }")]
 pub async fn get_gen_data(id_xml: PathBuf, client: &State<Client>) -> Result<RssGenData, Error> {
     if !is_xml(&id_xml) {
         return Err(Error::NotFound("Expected xml file"));
