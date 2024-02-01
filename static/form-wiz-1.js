@@ -9,13 +9,17 @@ autofillButton.addEventListener('click', async () => {
     spinner.style.display = 'inline-block';
 
     await fetch(`/api/autofill?url=${encodeURIComponent(url)}`).then(async (resp) => {
-        console.log(resp.ok);
         if (resp.ok) {
             autofillError.style.display = 'none';
             const text = await resp.text();
             regexForm.value = text;
+        // we return NotAccepted for when the AI response isn't valid regex
+        // "doesn't find any content that conforms to the criteria given by the user agent - Mozilla"
+        } else if (resp.status == 406) {
+            autofillError.style.display = 'block';
+            const text = await resp.text();
+            regexForm.value = text;
         } else {
-            console.log('ping');
             autofillError.style.display = 'block';
         }
         spinner.style.display = 'none';
