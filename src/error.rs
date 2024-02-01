@@ -22,6 +22,12 @@ pub fn build_error_html(msg: &'static str) -> String {
     )
 }
 
+impl From<regex::Error> for Error {
+    fn from(_: regex::Error) -> Self {
+        Self::BadRequest("unable to parse regex")
+    }
+}
+
 impl From<reqwest::Error> for Error {
     fn from(e: reqwest::Error) -> Self {
         let mut error = Error::Other("Unknown error");

@@ -38,11 +38,8 @@ pub fn convert_simple_regex(input: &str) -> Result<Regex, Error> {
 
     let items_re = format!("(?ms){}", items_re);
 
-    let Ok(re) = Regex::new(&items_re) else {
-        return Err(Error::BadRequest("Invalid regex"));
-    };
+   Ok(Regex::new(&items_re)?)
 
-    Ok(re)
 }
 
 /// utility function to download html from site and format nicely
