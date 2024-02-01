@@ -9,3 +9,4 @@ limits = { json = "10MiB" }
 
 [release]
 port = 9000
+log_level = "critical"

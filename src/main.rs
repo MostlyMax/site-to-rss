@@ -3,13 +3,11 @@ extern crate rocket;
 use rocket::{form::Form, State};
 use rocket::fs::{FileServer, relative};
 use rocket_dyn_templates::{Template, context};
-
 use aws_config::meta::region::RegionProviderChain;
 use aws_sdk_s3::Client;
-
 use rss::{ChannelBuilder, ItemBuilder};
-
 use std::path::PathBuf;
+use log::{debug, info};
 
 mod error;
 mod data;
@@ -62,6 +60,7 @@ async fn autofill(url: String) -> Result<String, Error> {
     let items_preview = utils::generate_preview(re, &text);
 
     if items_preview.is_empty() {
+        info!("OpenAI returned empty preview");
         return Err(Error::UnhelpfulAI(resp));
     }
 
@@ -74,6 +73,8 @@ async fn generate_2(form: Form<data::FormWiz1>) -> Result<Template, Template> {
         .expect("this should never fail if its the same url as used in generate_1");
 
     let Ok(re) = utils::convert_simple_regex(&form.items_regex) else {
+        debug!("bad regex: {}", form.items_regex);
+
         let text = text.replace("><", ">\n<");
 
         return Err(Template::render("form-wiz-1", context! {
@@ -124,6 +125,8 @@ async fn generate_3(form: Form<data::FormWiz2>) -> Result<Template, Error> {
 
 #[get("/<id_xml>")]
 async fn get_rss(id_xml: PathBuf, client: &State<Client>) -> Result<String, Error> {
+    debug!("trying to get rss for {:#?}", id_xml);
+
     let rss_gen_data = utils::get_gen_data(id_xml, client).await?;
     let text = utils::get_site_text(rss_gen_data.site_url).await?;
 
