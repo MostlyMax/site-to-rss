@@ -34,7 +34,7 @@ fn index() -> Template {
 
 #[post("/generate-1", data = "<form>")]
 async fn generate_1(form: Form<data::FormWiz0>) -> Result<Template, Template> {
-    let Ok(text) = utils::get_site_text(&form.site_url).await else {
+    let Ok(text) = utils::get_site_text(form.site_url.clone()).await else {
         return Err(Template::render("index", context! {
             site_url: form.site_url.clone(),
             error_msg: build_error_html(
@@ -53,7 +53,7 @@ async fn generate_1(form: Form<data::FormWiz0>) -> Result<Template, Template> {
 
 #[get("/autofill?<url>")]
 async fn autofill(url: String) -> Result<String, Error> {
-    let text = utils::get_site_text(&url).await?;
+    let text = utils::get_site_text(url).await?;
     let text_readable = text.replace("><", ">\n<");
 
     let Some(resp) = openai::autofill_test(&text_readable).await else {
@@ -72,7 +72,7 @@ async fn autofill(url: String) -> Result<String, Error> {
 
 #[post("/generate-2", data = "<form>")]
 async fn generate_2(form: Form<data::FormWiz1>) -> Result<Template, Template> {
-    let text = utils::get_site_text(&form.site_url).await
+    let text = utils::get_site_text(form.site_url.clone()).await
         .expect("this should never fail if its the same url as used in generate_1");
 
     let Ok(re) = utils::convert_simple_regex(&form.items_regex) else {
@@ -127,7 +127,7 @@ async fn generate_3(form: Form<data::FormWiz2>) -> Result<Template, Error> {
 #[get("/<id_xml>")]
 async fn get_rss(id_xml: PathBuf, client: &State<Client>) -> Result<String, Error> {
     let rss_gen_data = utils::get_gen_data(id_xml, client).await?;
-    let text = utils::get_site_text(&rss_gen_data.site_url).await?;
+    let text = utils::get_site_text(rss_gen_data.site_url).await?;
 
     let mut items = Vec::new();
     for capture in rss_gen_data.items_regex.captures_iter(&text) {
@@ -181,7 +181,7 @@ async fn template_generate(form: Form<FormWizGenerate>, client: &State<Client>) 
 }
 
 async fn generate(form: Form<FormWizGenerate>, client: &State<Client>) -> Result<String, Error> {
-    let _ = utils::get_site_text_dry(&form.site_url).await?;
+    let _ = utils::get_site_text_dry(form.site_url.clone()).await?;
     let rss_gen_data = RssGenData::try_from(form)?;
 
     let serialized_data = serde_json::to_string(&rss_gen_data).unwrap();

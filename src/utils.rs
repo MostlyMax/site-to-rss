@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use aws_sdk_s3::Client;
+use cached::proc_macro::cached;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use rocket::State;
@@ -45,7 +46,8 @@ pub fn convert_simple_regex(input: &str) -> Result<Regex, Error> {
 }
 
 /// utility function to download html from site and format nicely
-pub async fn get_site_text(url: &str) -> Result<String, Error> {
+#[cached(size=32, result = true)]
+pub async fn get_site_text(url: String) -> Result<String, Error> {
     let response = reqwest::get(url).await?;
     if !response.status().is_success() {
         return Err(Error::BadRequest("Bad url"));
@@ -62,7 +64,8 @@ pub async fn get_site_text(url: &str) -> Result<String, Error> {
 }
 
 /// does the same as get_site_text but without allocating and returning the string
-pub async fn get_site_text_dry(url: &str) -> Result<(), Error> {
+#[cached(size=16, result = true)]
+pub async fn get_site_text_dry(url: String) -> Result<(), Error> {
     let response = reqwest::get(url).await?;
     let _ = response.text().await?;
 
